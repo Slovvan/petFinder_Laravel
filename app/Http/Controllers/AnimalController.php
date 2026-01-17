@@ -1,26 +1,35 @@
 <?php
+
 namespace App\Http\Controllers;
 
-use App\Repositories\AnimalRepository;
+use App\Models\Animal;
+use App\Services\AnimalService;
+use App\Http\Requests\AnimalStoreRequest;
+use App\Http\Requests\AnimalUpdateRequest;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class AnimalController extends Controller
 {
-    public function __construct(protected AnimalRepository $animalRepo) {}
+    public function __construct(protected AnimalService $animalService) {}
 
     public function index(Request $request)
     {
-        // take all the filters
-        $animals = $this->animalRepo->searchAnimals($request->only([
-            'search', 'species', 'status', 'city'
+        $animals = $this->animalService->searchAnimals($request->only([
+            'search', 'species', 'status', 'city',
         ]));
-        
-        return view('animals.index', compact('animals'));
+
+        // Pass items collection for map markers iteration
+        $animalsForMap = $animals->getCollection();
+
+        return view('animals.index', compact('animals', 'animalsForMap'));
     }
+
     public function myAnimals()
     {
-        $animals = auth()->user()->animals()->latest()->get();
-        return view('animals.my-animals', compact('animals'));
+        $animals = $this->animalService->listUserAnimals(auth()->user());
+
+        return view('animals.my-animals-blade', compact('animals'));
     }
 
     public function show(Animal $animal)
@@ -33,15 +42,75 @@ class AnimalController extends Controller
         return view('animals.create');
     }
 
+    public function store(AnimalStoreRequest $request)
+    {
+        $this->authorize('create', Animal::class);
+
+        $validated = $request->validated();
+
+        if ($request->hasFile('image')) {
+            $validated['image'] = $request->file('image')->store('animals', 'public');
+        }
+
+        $this->animalService->storeAnimal($validated);
+
+        return redirect()->route('animals.mine')->with('success', '¡Anuncio publicado exitosamente!');
+    }
+
+    public function edit(Animal $animal)
+    {
+        $this->authorize('update', $animal);
+
+        return view('animals.edit', compact('animal'));
+    }
+
+    public function update(AnimalUpdateRequest $request, Animal $animal)
+    {
+        $this->authorize('update', $animal);
+
+        $validated = $request->validated();
+
+        if ($request->hasFile('image')) {
+            if ($animal->image) {
+                Storage::disk('public')->delete($animal->image);
+            }
+
+            $validated['image'] = $request->file('image')->store('animals', 'public');
+        }
+
+        $animal->update($validated);
+
+        return redirect()->route('animals.mine')->with('success', 'Anuncio actualizado exitosamente.');
+    }
+
+    public function destroy(Animal $animal)
+    {
+        $this->authorize('delete', $animal);
+
+        if ($animal->image) {
+            Storage::disk('public')->delete($animal->image);
+        }
+
+        $animal->delete();
+
+        return redirect()->route('animals.mine')->with('success', 'Anuncio eliminado exitosamente.');
+    }
+
     public function indexMap(Request $request)
     {
-        $animals = $this->animalRepo->searchAnimals($request->only([
-            'search', 'species', 'status', 'city'
+        $animals = $this->animalService->searchAnimals($request->only([
+            'search', 'species', 'status', 'city',
         ]));
 
-        // get animals with locations
-        $locations = $animals->whereNotNull('latitude')->whereNotNull('longitude');
+        $locations = $this->animalService->filterLocatedAnimals($animals);
 
         return view('animals.index', compact('animals', 'locations'));
+    }
+
+    public function notifications()
+    {
+        $notifications = auth()->user()->notifications()->paginate(10);
+
+        return view('animals.notifications', compact('notifications'));
     }
 }

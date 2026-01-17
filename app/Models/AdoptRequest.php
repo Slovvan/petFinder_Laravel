@@ -4,7 +4,17 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class adoptRequest extends Model
+class AdoptRequest extends Model
 {
-    //
+    protected $fillable = ['animal_id', 'user_id', 'message', 'read_at'];
+
+    public function animal()
+    {
+        return $this->belongsTo(Animal::class);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }

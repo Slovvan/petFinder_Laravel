@@ -5,10 +5,10 @@ namespace App\Services;
 use App\Models\User;
 use Illuminate\Support\Facades\Storage;
 
-class ProfileService {
+class ProfilService {
     public function updateProfile(User $user, array $data)
     {
-        $profile = $user->profile;
+        $profile = $user->profile ?: $user->profile()->create();
 
         if (isset($data['profile_photo'])) {
             // delete old

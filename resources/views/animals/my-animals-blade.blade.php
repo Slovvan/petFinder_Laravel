@@ -1,8 +1,19 @@
 <x-app-layout>
     <div class="card">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px;">
-            <h2 style="margin:0;">Mis Mascotas Publicadas</h2>
-            <a href="{{ route('animals.create') }}" style="background:var(--primary); color:white; padding:10px 20px; border-radius:8px; text-decoration:none;">+ Publicar</a>
+        <div class="card-header">
+            <h2 class="card-title">Mis Mascotas Publicadas</h2>
+            <div style="display: flex; gap: 10px;">
+                <a href="{{ route('notifications.index') }}" class="btn btn-secondary" style="position: relative;">
+                    Solicitudes
+                    @php
+                        $unreadCount = auth()->user()->notifications()->whereNull('read_at')->count();
+                    @endphp
+                    @if($unreadCount > 0)
+                        <span class="notification-badge">{{ $unreadCount }}</span>
+                    @endif
+                </a>
+                <a href="{{ route('animals.create') }}" class="btn">+ Publicar</a>
+            </div>
         </div>
 
         <table>
@@ -17,7 +28,12 @@
             <tbody>
                 @foreach($animals as $animal)
                 <tr>
-                    <td><strong>{{ $animal->name }}</strong></td>
+                    <td>
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <img src="{{ $animal->image ? asset('storage/'.$animal->image) : 'https://ui-avatars.com/api/?name='.urlencode($animal->name).'&background=f1f5f9&color=64748b' }}" alt="{{ $animal->name }}" class="thumbnail">
+                            <strong>{{ $animal->name }}</strong>
+                        </div>
+                    </td>
                     <td>{{ $animal->status }}</td>
                     <td>{{ $animal->city }}</td>
                     <td style="text-align:right;">

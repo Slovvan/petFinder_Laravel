@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Settings;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Settings\ProfileDeleteRequest;
 use App\Http\Requests\Settings\ProfileUpdateRequest;
+use App\Services\ProfilService;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -14,15 +15,16 @@ use Inertia\Response;
 
 class ProfileController extends Controller
 {
+    public function __construct(protected ProfilService $profileService) {}
+
     /**
      * Show the user's profile settings page.
      */
-    public function edit(Request $request): Response
+    public function edit(Request $request)
     {
-        return Inertia::render('settings/profile', [
-            'mustVerifyEmail' => $request->user() instanceof MustVerifyEmail,
-            'status' => $request->session()->get('status'),
-        ]);
+        $request->user()->profile()->firstOrCreate();
+
+        return view('settings.profile');
     }
 
     /**
@@ -30,7 +32,9 @@ class ProfileController extends Controller
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
-        $request->user()->fill($request->validated());
+        $validated = $request->validated();
+
+        $request->user()->fill(collect($validated)->only(['name', 'email'])->toArray());
 
         if ($request->user()->isDirty('email')) {
             $request->user()->email_verified_at = null;
@@ -38,7 +42,15 @@ class ProfileController extends Controller
 
         $request->user()->save();
 
-        return to_route('profile.edit');
+        $this->profileService->updateProfile(
+            $request->user(),
+            [
+                'bio' => $validated['bio'] ?? null,
+                'profile_photo' => $request->file('profile_photo'),
+            ]
+        );
+
+        return redirect()->route('profile.edit')->with('success', 'Perfil actualizado exitosamente.');
     }
 
     /**

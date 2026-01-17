@@ -10,7 +10,7 @@ class Animal extends Model
 {
     use HasFactory, Searchable;
 
-    protected $fillable = ['name', 'species', 'status', 'city', 'description', 'user_id', 'latitude', 'longitude'];
+    protected $fillable = ['name', 'species', 'status', 'city', 'description', 'user_id', 'latitude', 'longitude', 'image'];
 
     // Ddata to index
     public function toSearchableArray(): array
@@ -21,5 +21,10 @@ class Animal extends Model
             'city' => $this->city,
             'description' => $this->description,
         ];
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 }

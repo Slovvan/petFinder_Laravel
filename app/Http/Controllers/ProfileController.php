@@ -2,12 +2,12 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\UpdateProfileRequest;
-use App\Services\ProfileService;
+use App\Services\ProfilService;
 use Illuminate\Support\Facades\Gate;
 
 class ProfileController extends Controller
 {
-    public function __construct(protected ProfileService $profileService) {}
+    public function __construct(protected ProfilService $profileService) {}
 
     public function update(UpdateProfileRequest $request)
     {

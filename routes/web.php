@@ -1,7 +1,9 @@
 <?php
 use App\Http\Controllers\AnimalController;
+use App\Http\Controllers\AdoptionController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\RegisteredUserController;
+use Illuminate\Support\Facades\Route;
 
 // RUTA PÚBLICA: Todos pueden ver los animales
 Route::get('/', [AnimalController::class, 'index'])->name('animals.index');
@@ -18,5 +20,11 @@ Route::middleware('guest')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::get('/mis-animales', [AnimalController::class, 'myAnimals'])->name('animals.mine');
     Route::resource('animals', AnimalController::class)->except(['index']);
+    Route::post('/animals/{animal}/adopt', [AdoptionController::class, 'store'])->name('adopt.store');
+    Route::get('/notificaciones', [AnimalController::class, 'notifications'])->name('notifications.index');
+    Route::patch('/notificaciones/{id}/leida', [AdoptionController::class, 'markAsRead'])->name('notifications.mark-read');
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
 });
+
+// Settings routes (profile, password, 2FA)
+require __DIR__.'/settings.php';

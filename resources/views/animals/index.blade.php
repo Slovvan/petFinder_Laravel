@@ -1,81 +1,111 @@
 <x-app-layout>
-    <x-slot name="header">Panel de Control de Mascotas</x-slot>
-    <x-slot name="header">Mapa de Avisos</x-slot>
-
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    <div class="card mb-3">
+        <h3 class="card-title">Buscar Mascotas</h3>
+        <form method="GET" action="{{ route('animals.index') }}" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+            <div class="form-group">
+                <label>Buscar</label>
+                <input type="text" name="search" value="{{ request('search') }}" placeholder="Nombre o descripción">
+            </div>
+            <div class="form-group">
+                <label>Especie</label>
+                <select name="species">
+                    <option value="">Todas</option>
+                    <option value="dog" {{ request('species') == 'dog' ? 'selected' : '' }}>Perro</option>
+                    <option value="cat" {{ request('species') == 'cat' ? 'selected' : '' }}>Gato</option>
+                    <option value="bird" {{ request('species') == 'bird' ? 'selected' : '' }}>Pájaro</option>
+                    <option value="other" {{ request('species') == 'other' ? 'selected' : '' }}>Otro</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Estado</label>
+                <select name="status">
+                    <option value="">Todos</option>
+                    <option value="Lost" {{ request('status') == 'Lost' ? 'selected' : '' }}>Perdido</option>
+                    <option value="In Adoption" {{ request('status') == 'In Adoption' ? 'selected' : '' }}>En Adopción</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Ciudad</label>
+                <input type="text" name="city" value="{{ request('city') }}" placeholder="Ciudad">
+            </div>
+            <div style="display: flex; align-items: flex-end; gap: 10px;">
+                <button type="submit" class="btn" style="flex: 1;">Buscar</button>
+                <a href="{{ route('animals.index') }}" class="btn btn-secondary" style="flex: 1; text-align: center;">Limpiar</a>
+            </div>
+        </form>
+    </div>
     
-    <div class="card" style="padding: 0; overflow: hidden; margin-bottom: 30px;">
+    <div class="card mb-3" style="padding: 0; overflow: hidden;">
         <div id="map" style="height: 450px; width: 100%; z-index: 1;"></div>
     </div>
 
-    <div style="margin-top: 20px;">
-        <h2 style="font-size: 1.2rem; margin-bottom: 15px;">Listado Reciente</h2>
-        </div>
-
     <div class="card">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <h3 style="margin:0;">Listado Reciente</h3>
+        <div class="card-header">
+            <h3 class="card-title">Listado Reciente</h3>
             <a href="{{ route('animals.create') }}" class="btn">+ Nueva Mascota</a>
         </div>
 
-        <table style="width:100%; border-collapse: collapse;">
+        <table>
             <thead>
-                <tr style="text-align: left; border-bottom: 2px solid #f3f4f6;">
-                    <th style="padding:12px;">Mascota</th>
-                    <th style="padding:12px;">Especie</th>
-                    <th style="padding:12px;">Estado</th>
-                    <th style="padding:12px;">Ciudad</th>
-                    <th style="padding:12px; text-align:right;">Acción</th>
+                <tr>
+                    <th>Mascota</th>
+                    <th>Especie</th>
+                    <th>Estado</th>
+                    <th>Ciudad</th>
+                    <th style="text-align:right;">Acción</th>
                 </tr>
             </thead>
             <tbody>
                 @forelse($animals as $animal)
-                <tr style="border-bottom: 1px solid #f3f4f6;">
-                    <td style="padding:12px; font-weight: bold;">{{ $animal->name }}</td>
-                    <td style="padding:12px;">{{ $animal->species }}</td>
-                    <td style="padding:12px;">
-                        <span style="padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; 
-                            {{ $animal->status == 'Perdido' ? 'background:#fee2e2; color:#dc2626;' : 'background:#dcfce7; color:#16a34a;' }}">
-                            {{ $animal->status }}
+                <tr>
+                    <td>
+                        <div class="flex" style="align-items:center; gap:10px;">
+                            <img src="{{ $animal->image ? asset('storage/'.$animal->image) : 'https://ui-avatars.com/api/?name='.urlencode($animal->name).'&background=f1f5f9&color=64748b' }}" alt="{{ $animal->name }}" class="thumbnail">
+                            <strong>{{ $animal->name }}</strong>
+                        </div>
+                    </td>
+                    <td>{{ $animal->species }}</td>
+                    <td>
+                        <span class="badge badge-{{ $animal->status == 'Lost' ? 'danger' : 'success' }}">
+                            {{ $animal->status == 'Lost' ? 'Perdido' : 'En Adopción' }}
                         </span>
                     </td>
-                    <td style="padding:12px;">{{ $animal->city }}</td>
-                    <td style="padding:12px; text-align:right;">
-                        <a href="{{ route('animals.show', $animal) }}" style="color:var(--primary); text-decoration: none; font-weight: bold;">Ver Detalles</a>
+                    <td>{{ $animal->city }}</td>
+                    <td style="text-align:right;">
+                        <a href="{{ route('animals.show', $animal) }}" style="color:var(--primary); text-decoration: none; font-weight: 600;">Ver Detalles</a>
                     </td>
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="5" style="padding:30px; text-align:center; color:#9ca3af;">No hay mascotas registradas.</td>
+                    <td colspan="5" class="text-center text-muted" style="padding:30px;">No hay mascotas registradas.</td>
                 </tr>
                 @endforelse
             </tbody>
         </table>
 
-        <div style="margin-top: 20px;">
-            {{ $animals->links() }}
+        <div class="mt-3">
+            {{ $animals->links('pagination::petfinder') }}
         </div>
     </div>
-     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script>
-        // 1. Inicializar el mapa (centrado en Nancy por defecto)
-        var map = L.map('map').setView([48.6919, 6.1828], 13);
 
-        // 2. Cargar la capa visual (OpenStreetMap)
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        const map = L.map('map').setView([46.5, 2.5], 6);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; OpenStreetMap contributors'
         }).addTo(map);
 
-        // 3. Generar marcadores dinámicos desde PHP
         @foreach($animals as $animal)
             @if($animal->latitude && $animal->longitude)
                 L.marker([{{ $animal->latitude }}, {{ $animal->longitude }}])
                     .addTo(map)
                     .bindPopup(`
-                        <div style="text-align: center;">
+                        <div class="text-center">
                             <strong style="font-size: 1rem;">{{ $animal->name }}</strong><br>
-                            <span style="color: {{ $animal->status == 'Perdido' ? '#ef4444' : '#10b981' }}; font-weight: bold;">
-                                {{ $animal->status }}
+                            <span style="color: {{ $animal->status == 'Lost' ? '#ef4444' : '#10b981' }}; font-weight: bold;">
+                                {{ $animal->status == 'Lost' ? 'Perdido' : 'En Adopción' }}
                             </span><br>
                             <a href="{{ route('animals.show', $animal) }}" style="text-decoration: none; color: #4f46e5; font-weight: bold; display: inline-block; margin-top: 5px;">Ver ficha</a>
                         </div>
