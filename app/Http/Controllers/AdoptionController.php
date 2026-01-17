@@ -11,7 +11,7 @@ class AdoptionController extends Controller
         $validated = $request->validate(['message' => 'required|string|max:500']);
         
         $service->createRequest($animal, $validated);
-
+        
         return back()->with('success', 'Owner notified.');
     }
 }

@@ -14,7 +14,34 @@ class AnimalController extends Controller
         $animals = $this->animalRepo->searchAnimals($request->only([
             'search', 'species', 'status', 'city'
         ]));
-
+        
         return view('animals.index', compact('animals'));
+    }
+    public function myAnimals()
+    {
+        $animals = auth()->user()->animals()->latest()->get();
+        return view('animals.my-animals', compact('animals'));
+    }
+
+    public function show(Animal $animal)
+    {
+        return view('animals.show', compact('animal'));
+    }
+
+    public function create()
+    {
+        return view('animals.create');
+    }
+
+    public function indexMap(Request $request)
+    {
+        $animals = $this->animalRepo->searchAnimals($request->only([
+            'search', 'species', 'status', 'city'
+        ]));
+
+        // get animals with locations
+        $locations = $animals->whereNotNull('latitude')->whereNotNull('longitude');
+
+        return view('animals.index', compact('animals', 'locations'));
     }
 }

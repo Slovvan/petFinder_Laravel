@@ -14,9 +14,11 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-
+    // 
+        Animal::factory(100)->create(); 
         $users = User::factory(50)->create()->each(function ($user) {
         $user->profile()->create(['bio' => 'New profil.']); 
+        
         });
 
         // create 100 new animals
