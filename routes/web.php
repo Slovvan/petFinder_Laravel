@@ -22,6 +22,8 @@ Route::middleware('auth')->group(function () {
     Route::resource('animals', AnimalController::class)->except(['index']);
     Route::post('/animals/{animal}/adopt', [AdoptionController::class, 'store'])->name('adopt.store');
     Route::get('/notificaciones', [AnimalController::class, 'notifications'])->name('notifications.index');
+    Route::get('/notificaciones/unread-count', [AnimalController::class, 'unreadNotificationsCount'])->name('notifications.unread-count');
+    Route::get('/notificaciones/unread', [AnimalController::class, 'unreadNotifications'])->name('notifications.unread');
     Route::patch('/notificaciones/{id}/leida', [AdoptionController::class, 'markAsRead'])->name('notifications.mark-read');
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
 });

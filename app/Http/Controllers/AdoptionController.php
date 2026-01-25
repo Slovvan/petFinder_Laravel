@@ -8,12 +8,13 @@ use App\Notifications\AdoptionRequestReceived;
 use App\Http\Requests\AdoptionRequest as AdoptionFormRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 class AdoptionController extends Controller
 {
     public function store(AdoptionFormRequest $request, Animal $animal): RedirectResponse
     {
-        $this->authorize('adopt', $animal);
+        Gate::authorize('adopt', $animal);
 
         $validated = $request->validated();
 

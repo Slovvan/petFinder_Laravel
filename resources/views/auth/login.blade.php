@@ -1,31 +1,31 @@
 <x-app-layout>
-    <div style="max-width: 400px; margin: 50px auto; background: white; padding: 30px; border-radius: 8px; border: 1px solid #e2e8f0;">
-        <h2 style="margin-top: 0;">Iniciar Sesión</h2>
-        
+    <div class="card" style="max-width: 420px; margin: 0 auto;">
+        <h2 class="card-title mb-2">Se connecter</h2>
+
         @if ($errors->any())
-            <div style="color: #e53e3e; margin-bottom: 15px; font-size: 0.9rem;">
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
+            <div class="alert alert-error">
+                <ul style="margin: 0; padding-left: 20px;">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
             </div>
         @endif
 
         <form method="POST" action="{{ route('login') }}">
             @csrf
-            <div style="margin-bottom: 15px;">
-                <label style="display:block; margin-bottom: 5px;">Email</label>
-                <input type="email" name="email" required style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px;">
+            <div class="form-group">
+                <label>E-mail</label>
+                <input type="email" name="email" required>
             </div>
-            <div style="margin-bottom: 20px;">
-                <label style="display:block; margin-bottom: 5px;">Contraseña</label>
-                <input type="password" name="password" required style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px;">
+            <div class="form-group">
+                <label>Mot de passe</label>
+                <input type="password" name="password" required>
             </div>
-            <button type="submit" style="width: 100%; background: #4f46e5; color: white; padding: 10px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">
-                Entrar
-            </button>
+            <button type="submit" class="btn" style="width: 100%;">Connexion</button>
         </form>
-        <p style="margin-top: 15px; font-size: 0.9rem; text-align: center;">
-            ¿No tienes cuenta? <a href="{{ route('register') }}" style="color: #4f46e5;">Regístrate</a>
+        <p class="text-muted text-center mt-2">
+            Vous n'avez pas de compte ? <a href="{{ route('register') }}">Inscrivez-vous</a>
         </p>
     </div>
 </x-app-layout>

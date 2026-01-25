@@ -1,92 +1,56 @@
 <x-app-layout>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
-    <div class="card mb-3">
-        <h3 class="card-title">Buscar Mascotas</h3>
-        <form method="GET" action="{{ route('animals.index') }}" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
-            <div class="form-group">
-                <label>Buscar</label>
-                <input type="text" name="search" value="{{ request('search') }}" placeholder="Nombre o descripción">
-            </div>
-            <div class="form-group">
-                <label>Especie</label>
-                <select name="species">
-                    <option value="">Todas</option>
-                    <option value="dog" {{ request('species') == 'dog' ? 'selected' : '' }}>Perro</option>
-                    <option value="cat" {{ request('species') == 'cat' ? 'selected' : '' }}>Gato</option>
-                    <option value="bird" {{ request('species') == 'bird' ? 'selected' : '' }}>Pájaro</option>
-                    <option value="other" {{ request('species') == 'other' ? 'selected' : '' }}>Otro</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>Estado</label>
-                <select name="status">
-                    <option value="">Todos</option>
-                    <option value="Lost" {{ request('status') == 'Lost' ? 'selected' : '' }}>Perdido</option>
-                    <option value="In Adoption" {{ request('status') == 'In Adoption' ? 'selected' : '' }}>En Adopción</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>Ciudad</label>
-                <input type="text" name="city" value="{{ request('city') }}" placeholder="Ciudad">
-            </div>
-            <div style="display: flex; align-items: flex-end; gap: 10px;">
-                <button type="submit" class="btn" style="flex: 1;">Buscar</button>
-                <a href="{{ route('animals.index') }}" class="btn btn-secondary" style="flex: 1; text-align: center;">Limpiar</a>
-            </div>
-        </form>
-    </div>
-    
-    <div class="card mb-3" style="padding: 0; overflow: hidden;">
-        <div id="map" style="height: 450px; width: 100%; z-index: 1;"></div>
-    </div>
-
-    <div class="card">
-        <div class="card-header">
-            <h3 class="card-title">Listado Reciente</h3>
-            <a href="{{ route('animals.create') }}" class="btn">+ Nueva Mascota</a>
+    <div class="flex" style="gap: 12px; align-items: stretch; height: 100vh;">
+        <div class="card mb-3" style="padding: 0; overflow: hidden; flex: 1 1 70%; min-width: 320px; height: 100%;">
+            <div id="map" style="height: 100%; width: 100%; z-index: 1;"></div>
         </div>
 
-        <table>
-            <thead>
-                <tr>
-                    <th>Mascota</th>
-                    <th>Especie</th>
-                    <th>Estado</th>
-                    <th>Ciudad</th>
-                    <th style="text-align:right;">Acción</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse($animals as $animal)
-                <tr>
-                    <td>
-                        <div class="flex" style="align-items:center; gap:10px;">
-                            <img src="{{ $animal->image ? asset('storage/'.$animal->image) : 'https://ui-avatars.com/api/?name='.urlencode($animal->name).'&background=f1f5f9&color=64748b' }}" alt="{{ $animal->name }}" class="thumbnail">
-                            <strong>{{ $animal->name }}</strong>
-                        </div>
-                    </td>
-                    <td>{{ $animal->species }}</td>
-                    <td>
-                        <span class="badge badge-{{ $animal->status == 'Lost' ? 'danger' : 'success' }}">
-                            {{ $animal->status == 'Lost' ? 'Perdido' : 'En Adopción' }}
-                        </span>
-                    </td>
-                    <td>{{ $animal->city }}</td>
-                    <td style="text-align:right;">
-                        <a href="{{ route('animals.show', $animal) }}" style="color:var(--primary); text-decoration: none; font-weight: 600;">Ver Detalles</a>
-                    </td>
-                </tr>
-                @empty
-                <tr>
-                    <td colspan="5" class="text-center text-muted" style="padding:30px;">No hay mascotas registradas.</td>
-                </tr>
-                @endforelse
-            </tbody>
-        </table>
+        <div class="card" style="flex: 1 1 30%; min-width: 280px; height: 100%; overflow: auto; padding: 8px;">
+            <div class="card-header" style="margin-bottom: 8px;">
+                <h3 class="card-title">Annonces Récentes</h3>
+                <a href="{{ route('animals.create') }}" class="btn">+ Nouvel Animal</a>
+            </div>
+            <div class="mt-3" style="margin-top: 6px;">
+                {{ $animals->links('pagination::petfinder') }}
+            </div>
 
-        <div class="mt-3">
-            {{ $animals->links('pagination::petfinder') }}
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+                @forelse($animals as $animal)
+                    <details class="card" style="padding: 6px;">
+                        <summary style="display: flex; align-items: center; justify-content: space-between; gap: 8px; cursor: pointer; list-style: none;">
+                            <div class="flex" style="align-items:center; gap:8px;">
+                                <img src="{{ $animal->image ? asset('storage/'.$animal->image) : 'https://ui-avatars.com/api/?name='.urlencode($animal->name).'&background=f1f5f9&color=64748b' }}" alt="{{ $animal->name }}" class="thumbnail">
+                                <div>
+                                    <strong>{{ $animal->name }}</strong>
+                                    <div class="text-muted" style="font-size: 11px;">{{ $animal->city }}</div>
+                                </div>
+                            </div>
+                            <span style="font-weight: bold; color: {{ $animal->status == 'Lost' ? '#d00' : '#060' }};">
+                                {{ $animal->status == 'Lost' ? 'Perdu' : 'En Adoption' }}
+                            </span>
+                        </summary>
+                        <div style="padding: 6px 0 0; border-top: 1px dashed var(--border); margin-top: 6px;">
+                            <div class="flex" style="justify-content: space-between; gap: 8px; flex-wrap: wrap;">
+                                <div>
+                                    <div class="text-muted" style="font-size: 11px;">Espèce</div>
+                                    <div>{{ $animal->species }}</div>
+                                </div>
+                                <div>
+                                    <div class="text-muted" style="font-size: 11px;">Ville</div>
+                                    <div>{{ $animal->city }}</div>
+                                </div>
+                                <div class="flex" style="align-items:center; gap:8px; margin-left: auto;">
+                                    <a href="{{ route('animals.show', $animal) }}" class="btn">Voir Détails</a>
+                                </div>
+                            </div>
+                        </div>
+                    </details>
+                @empty
+                    <div style="padding: 12px; text-align: center; color: #555;">Aucun animal enregistré.</div>
+                @endforelse
+            </div>
+
         </div>
     </div>
 
@@ -105,9 +69,9 @@
                         <div class="text-center">
                             <strong style="font-size: 1rem;">{{ $animal->name }}</strong><br>
                             <span style="color: {{ $animal->status == 'Lost' ? '#ef4444' : '#10b981' }}; font-weight: bold;">
-                                {{ $animal->status == 'Lost' ? 'Perdido' : 'En Adopción' }}
+                                {{ $animal->status == 'Lost' ? 'Perdu' : 'En Adoption' }}
                             </span><br>
-                            <a href="{{ route('animals.show', $animal) }}" style="text-decoration: none; color: #4f46e5; font-weight: bold; display: inline-block; margin-top: 5px;">Ver ficha</a>
+                            <a href="{{ route('animals.show', $animal) }}" style="text-decoration: none; color: #4f46e5; font-weight: bold; display: inline-block; margin-top: 5px;">Voir fiche</a>
                         </div>
                     `);
             @endif

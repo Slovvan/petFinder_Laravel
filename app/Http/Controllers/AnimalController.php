@@ -113,4 +113,31 @@ class AnimalController extends Controller
 
         return view('animals.notifications', compact('notifications'));
     }
+
+    public function unreadNotificationsCount()
+    {
+        $count = auth()->user()->unreadNotifications()->count();
+
+        return response()->json(['count' => $count]);
+    }
+
+    public function unreadNotifications()
+    {
+        $notifications = auth()->user()->unreadNotifications()
+            ->latest()
+            ->take(5)
+            ->get()
+            ->map(function ($notification) {
+                return [
+                    'id' => $notification->id,
+                    'animal_name' => $notification->data['animal_name'] ?? 'Animal',
+                    'requester_name' => $notification->data['requester_name'] ?? 'Utilisateur',
+                    'message' => $notification->data['message'] ?? 'Sans message',
+                    'animal_url' => $notification->data['animal_url'] ?? '#',
+                    'created_at' => $notification->created_at->diffForHumans(),
+                ];
+            });
+
+        return response()->json(['notifications' => $notifications]);
+    }
 }

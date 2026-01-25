@@ -8,29 +8,56 @@
 
                 <div class="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
                     <x-nav-link :href="route('animals.index')" :active="request()->routeIs('animals.index')">
-                        Explorar
+                        Explorer
                     </x-nav-link>
                     @auth
                     <x-nav-link :href="route('animals.create')" :active="request()->routeIs('animals.create')">
-                        Publicar Anuncio
+                        Publier une Annonce
                     </x-nav-link>
                     @endauth
                 </div>
             </div>
 
-            <div class="hidden sm:flex items-center flex-1 justify-center px-6">
-                <form action="{{ route('animals.index') }}" method="GET" class="w-full max-w-lg">
-                    <div class="relative">
-                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center">
-                            <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                            </svg>
-                        </span>
-                        <input type="text" name="search" placeholder="Buscar por raza, ciudad o palabra clave..." 
-                               class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-full leading-5 bg-gray-50 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:text-sm">
-                    </div>
-                </form>
-            </div>
+            @if(request()->routeIs('animals.index'))
+                <div class="hidden sm:flex items-center flex-1 justify-center px-6">
+                    <form action="{{ route('animals.index') }}" method="GET" class="w-full" style="max-width: 720px;">
+                        <div class="flex items-end gap-2" style="flex-wrap: wrap;">
+                            <div class="flex flex-col gap-1" style="flex: 1 1 180px; min-width: 160px;">
+                                <label class="text-[11px] text-gray-500">Rechercher</label>
+                                <input type="text" name="search" value="{{ request('search') }}" placeholder="Nom ou description"
+                                       class="rounded-md border-gray-300 bg-gray-50">
+                            </div>
+                            <div class="flex flex-col gap-1" style="flex: 1 1 140px; min-width: 120px;">
+                                <label class="text-[11px] text-gray-500">Espèce</label>
+                                <select name="species" class="rounded-md border-gray-300 bg-gray-50">
+                                    <option value="">Toutes</option>
+                                    <option value="dog" {{ request('species') == 'dog' ? 'selected' : '' }}>Chien</option>
+                                    <option value="cat" {{ request('species') == 'cat' ? 'selected' : '' }}>Chat</option>
+                                    <option value="bird" {{ request('species') == 'bird' ? 'selected' : '' }}>Oiseau</option>
+                                    <option value="other" {{ request('species') == 'other' ? 'selected' : '' }}>Autre</option>
+                                </select>
+                            </div>
+                            <div class="flex flex-col gap-1" style="flex: 1 1 140px; min-width: 120px;">
+                                <label class="text-[11px] text-gray-500">Statut</label>
+                                <select name="status" class="rounded-md border-gray-300 bg-gray-50">
+                                    <option value="">Tous</option>
+                                    <option value="Lost" {{ request('status') == 'Lost' ? 'selected' : '' }}>Perdu</option>
+                                    <option value="In Adoption" {{ request('status') == 'In Adoption' ? 'selected' : '' }}>En Adoption</option>
+                                </select>
+                            </div>
+                            <div class="flex flex-col gap-1" style="flex: 1 1 140px; min-width: 120px;">
+                                <label class="text-[11px] text-gray-500">Ville</label>
+                                <input type="text" name="city" value="{{ request('city') }}" placeholder="Ville"
+                                       class="rounded-md border-gray-300 bg-gray-50">
+                            </div>
+                            <div class="flex items-end gap-2">
+                                <button type="submit" class="btn" style="height: 36px;">Rechercher</button>
+                                <a href="{{ route('animals.index') }}" class="btn btn-secondary" style="height: 36px;">Effacer</a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            @endif
 
             <div class="hidden sm:flex sm:items-center sm:ml-6 space-x-4">
                 @auth
@@ -57,7 +84,7 @@
                                     <span class="text-xs text-gray-400">{{ $notification->created_at->diffForHumans() }}</span>
                                 </div>
                             @empty
-                                <div class="px-4 py-3 text-sm text-gray-500">No hay notificaciones.</div>
+                                <div class="px-4 py-3 text-sm text-gray-500">Aucune notification.</div>
                             @endforelse
                         </div>
                     </div>
@@ -70,16 +97,16 @@
                             </button>
                         </x-slot>
                         <x-slot name="content">
-                            <x-dropdown-link :href="route('profile.edit')">Mi Perfil</x-dropdown-link>
+                            <x-dropdown-link :href="route('profile.edit')">Mon Profil</x-dropdown-link>
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
-                                <x-dropdown-link :href="route('logout')" onclick="event.preventDefault(); this.closest('form').submit();">Cerrar Sesión</x-dropdown-link>
+                                <x-dropdown-link :href="route('logout')" onclick="event.preventDefault(); this.closest('form').submit();">Déconnexion</x-dropdown-link>
                             </form>
                         </x-slot>
                     </x-dropdown>
                 @else
-                    <a href="{{ route('login') }}" class="text-sm text-gray-700 underline">Login</a>
-                    <a href="{{ route('register') }}" class="ml-4 text-sm text-gray-700 underline">Registro</a>
+                    <a href="{{ route('login') }}" class="text-sm text-gray-700 underline">Connexion</a>
+                    <a href="{{ route('register') }}" class="ml-4 text-sm text-gray-700 underline">Inscription</a>
                 @endauth
             </div>
         </div>

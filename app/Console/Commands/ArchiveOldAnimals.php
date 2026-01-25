@@ -5,7 +5,7 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use App\Services\AnimalService;
 
-class ArchivedOldAnimals extends Command
+class ArchiveOldAnimals extends Command
 {
     /**
      * The name and signature of the console command.
@@ -18,13 +18,14 @@ class ArchivedOldAnimals extends Command
      *
      * @var string
      */
-    protected $description = 'archive automatically anounces older than 30 days';
+    protected $description = 'Archive automatically announcements older than 30 days';
     /**
      * Execute the console command.
      */
     public function handle(AnimalService $service)
     {
         $count = $service->archiveExpiredPosts();
-        $this->info("{$count} Archived.");
+        $this->info("{$count} animals archived successfully.");
+        return Command::SUCCESS;
     }
 }
